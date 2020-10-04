@@ -65,7 +65,9 @@
                 myForm.reset()
             }else if (xhr.status===400){
                 const errorJson = xhr.response
-                console.log(errorJson)
+            }else if (xhr.status===401){
+                alert("Please login to tweet!!")
+                window.location.href("/login")
             }else if (xhr.status===500){
                 alert("An error occured on the server. PLease try again later")
         }
