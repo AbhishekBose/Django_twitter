@@ -28,6 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1']
 
+MAX_TWEET_LENGTH = 240
 
 
 LOGIN_URL = "/login" #LOGIN URL has a default URL specified by django though
@@ -40,6 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #third-party
+    "rest_framework",
+    #internal
     'tweets',
 ]
 

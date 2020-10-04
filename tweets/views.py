@@ -7,6 +7,9 @@ import random
 from .forms import TweetForm
 from django.utils.http import is_safe_url
 from django.views.decorators.csrf import csrf_protect
+from .serializers import TweetSerializer
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
 
 ALLOWED_HOSTS = settings.ALLOWED_HOSTS
 
@@ -17,9 +20,36 @@ def home_view(requests,*args,**kwargs):
     print(requests.user or None)
     return render(requests,"pages/home.html",context={},status=200)
 
+@api_view(['POST']) #http method from client should be POST
+def tweet_create_view(requests,*args,**kwargs):
+    print(requests.user)
+    serializer =  TweetSerializer(data=requests.POST or None)
+    if serializer.is_valid(raise_exception=True): #ths will send back what the error is
+        serializer.save(user=requests.user)
+        return Response(serializer.data,status=201)
+    return Response({},status=400)
+
+
+@api_view(['GET'])
+def tweet_list_view(requests,*args,**kwargs):
+    qs = Tweet.objects.all()
+    serializer =  TweetSerializer(qs,many=True)
+    return Response(serializer.data,status=200)
+
+
+
+@api_view(['GET'])
+def tweet_detail_view(requests,tweet_id,*args,**kwargs):
+    qs = Tweet.objects.filter(id=tweet_id)
+    if not qs.exists():
+        return Response({},status=404)
+    obj = qs.first()
+    serializer =  TweetSerializer(obj)
+
+    return Response(serializer.data,status=200)
 
 # @csrf_protect
-def tweet_create_view(requests,*args,**kwargs):
+def tweet_create_view_pure_django(requests,*args,**kwargs):
     user = requests.user
     # print(kuchbhi)
     if not requests.user.is_authenticated:
@@ -50,7 +80,7 @@ def tweet_create_view(requests,*args,**kwargs):
     return render(requests,"components/forms.html",context={"form":form})
 
 # @csrf_protect
-def tweet_list_view(requests,*args,**kwargs):
+def tweet_list_view_pure_django(requests,*args,**kwargs):
     qs = Tweet.objects.all()
     tweets_list = [x.serialize() for x in qs]
     data ={
@@ -60,7 +90,7 @@ def tweet_list_view(requests,*args,**kwargs):
     return JsonResponse(data)
 
 # @csrf_protect
-def tweet_detail_view(requests,tweet_id,*args,**kwargs):
+def tweet_detail_view_pure_django(requests,tweet_id,*args,**kwargs):
     """
     REST API view
     Consume by JS or anything else
